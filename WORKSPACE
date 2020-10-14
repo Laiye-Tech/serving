@@ -21,6 +21,15 @@ local_repository(
 #    and update the 'sha256' arg with the result.
 # 3. Request the new archive to be mirrored on mirror.bazel.build for more
 #    reliable downloads.
+
+# load("//tensorflow_serving:repo.bzl", "tensorflow_http_archive")
+# tensorflow_http_archive(
+#     name = "org_tensorflow",
+#     sha256 = "367be7a2f1ea3d9b87eaab507cea138200253c5fbd789131b92e48cbea1009b5",
+#     git_commit = "638f20b2a37bec2d77159a03f6bc87b86e5ff8c0",
+# )
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+git_repository(
 load("//tensorflow_serving:repo.bzl", "tensorflow_http_archive")
 tensorflow_http_archive(
     name = "org_tensorflow",
