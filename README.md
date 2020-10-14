@@ -5,6 +5,73 @@
 ![Docker CPU Nightly Build Status](https://storage.googleapis.com/tensorflow-serving-kokoro-build-badges/docker-cpu-nightly.svg)
 ![Docker GPU Nightly Build Status](https://storage.googleapis.com/tensorflow-serving-kokoro-build-badges/docker-gpu-nightly.svg)
 
+## Difference from origin repo
+
+This forked repo use forked TensorFlow repo `https://github.com/Laiye-Tech/tensorflow` which modified `ReadBinaryProto` function for load a encrypted saved model(a pb file). so the saved model should be ecnrypted by our [ecnrypt tool](https://github.com/Laiye-Tech/cryptpb).
+
+## Architecture of encrypted model
+
+![](./images/TensorFlow模型.jpg)
+
+### Build from sources
+
+There are some differences from TensorFlow build document. 
+
+**CPU**
+```sh
+docker build --build-arg \
+    -t snowcrumble/tensorflow-serving-devel:v2.2.0-crypt \
+    -f tensorflow_serving/tools/docker/Dockerfile.devel .
+
+docker push snowcrumble/tensorflow-serving-devel:v2.2.0-crypt
+
+docker build --build-arg \
+    TF_SERVING_BUILD_IMAGE=snowcrumble/tensorflow-serving-devel:v2.2.0-crypt \
+    -t snowcrumble/tensorflow-serving:v2.2.0-crypt \
+    -f tensorflow_serving/tools/docker/Dockerfile .
+```
+
+**GPU**
+```sh
+docker build -t snowcrumble/tensorflow-serving-devel-gpu:v2.2.0-crypt-nolm \
+    -f tensorflow_serving/tools/docker/Dockerfile.devel-gpu .
+
+docker push snowcrumble/tensorflow-serving-devel-gpu:v2.2.0-crypt-nolm
+
+docker build --build-arg \
+    TF_SERVING_BUILD_IMAGE=snowcrumble/tensorflow-serving-devel-gpu:v2.2.0-crypt-nolm \
+    -t snowcrumble/tensorflow-serving-gpu:v2.2.0-crypt-nolm \
+    -f tensorflow_serving/tools/docker/Dockerfile.gpu .
+```
+
+### Run
+
+Make sure saved_model.pb is encrypted by our [crypt tool](https://git.laiye.com/lijingfeng/cryptpb#run)
+
+```sh
+export MODEL_DIR=$PWD/tensorflow_serving/servables/tensorflow/testdata/saved_model_half_plus_two_cpu/
+export MODEL_NAME=half_plus_two
+docker run -t --rm -p 8501:8501 -p 8500:8500 \
+    -v "$MODEL_DIR:/models/$MODEL_NAME" \
+    -e MODEL_NAME=$MODEL_NAME \
+    -e TF_CPP_MIN_VLOG_LEVEL=2 \
+    -e LM_CLIENT_SERVICE_ID="100001" \
+    -e LM_CLIENT_LICENSE_MANAGER_ADDR="localhost:19080" \
+    snowcrumble/tensorflow-serving:v2.2.0-crypt-nolm &
+
+# 多模型
+docker run -t --rm -p 8501:8501 -p 8500:8500 \
+    --entrypoint /usr/bin/tensorflow_model_server \
+    -v "$PWD:/models" \
+    -e TF_CPP_MIN_VLOG_LEVEL=2 \
+    -e LM_CLIENT_SERVICE_ID="100001" \
+    -e LM_CLIENT_LICENSE_MANAGER_ADDR="localhost:19080" \
+    snowcrumble/tensorflow-serving --port=8500 --rest_api_port=8501 \
+    --model_config_file="/models/config"
+```
+
+*Below is original doc.*
+
 ----
 TensorFlow Serving is a flexible, high-performance serving system for
 machine learning models, designed for production environments. It deals with

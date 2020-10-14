@@ -127,7 +127,7 @@ ENV TENSORRT_INSTALL_PATH=/usr/lib/x86_64-linux-gnu
 ENV TF_CUDA_VERSION=11.0
 ENV TF_CUDNN_VERSION=8
 
-# Fix paths so that CUDNN can be found: https://github.com/tensorflow/tensorflow/issues/8264
+# Fix paths so that CUDNN can be found: https://github.com/Laiye-Tech/tensorflow/issues/8264
 WORKDIR /
 RUN mkdir /usr/lib/x86_64-linux-gnu/include/ && \
   ln -s /usr/include/cudnn.h /usr/local/cuda/include/cudnn.h && \
@@ -143,16 +143,16 @@ ENV TMP="/tmp"
 
 # Download TF Serving sources (optionally at specific commit).
 WORKDIR /tensorflow-serving
-RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} https://github.com/tensorflow/serving . && \
-    git remote add upstream https://github.com/tensorflow/serving.git && \
+RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} https://github.com/Laiye-Tech/serving . && \
+    git remote add upstream https://github.com/Laiye-Tech/serving.git && \
     if [ "${TF_SERVING_VERSION_GIT_COMMIT}" != "head" ]; then git checkout ${TF_SERVING_VERSION_GIT_COMMIT} ; fi
 
 FROM base_build as binary_build
 # Build, and install TensorFlow Serving
-ARG TF_SERVING_BUILD_OPTIONS="--config=release"
-RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
+ARG TF_SERVING_BUILD_OPTIONS="--config=x86-64"
+RUN echo "Building with build options: $TF_SERVING_BUILD_OPTIONS"
 ARG TF_SERVING_BAZEL_OPTIONS=""
-RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
+RUN echo "Building with Bazel options: $TF_SERVING_BAZEL_OPTIONS"
 
 RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \

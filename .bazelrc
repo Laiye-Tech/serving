@@ -27,6 +27,11 @@ build:nativeopt --copt=-O3
 
 build --keep_going
 build --verbose_failures=true
+# Reference https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+build:x86-64 --copt=-march=x86-64
+build:x86-64 --host_copt=-march=x86-64
+build:x86-64 --copt=-O3
+
 build --action_env PYTHON_BIN_PATH="/usr/bin/python3"
 build --define PYTHON_BIN_PATH=/usr/bin/python3
 
@@ -47,8 +52,11 @@ build --host_cxxopt=-std=c++14
 # Adding "--cxxopt=-D_GLIBCXX_USE_CXX11_ABI=0" creates parity with TF
 # compilation options. It also addresses memory use due to
 # copy-on-write semantics of std::strings of the older ABI.
-build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=0
+build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
 build --workspace_status_command=/proc/self/cwd/tools/gen_status_stamp.sh
 
 build --experimental_repo_remote_exec
+
+build --copt=-Wno-maybe-uninitialized
+build --copt=-fexceptions
