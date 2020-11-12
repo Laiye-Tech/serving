@@ -2,19 +2,19 @@
 
 [README](README.md) | [中文文档](README_zh.md)
 
-## Difference from origin repo
+## 与官方repo的区别
 
-This forked repo provide a way to protect the safety of model files, it use forked TensorFlow repo [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow) which modified `ReadBinaryProto` function for load a encrypted saved model(a pb file). so the saved model should be ecnrypted by our [ecnrypt tool](https://github.com/Laiye-Tech/cryptpb).
+此 repo 提供一种保护模型文件安全性的方法，它依赖我们 fork 的 TensorFlow repo: [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow)，我们修改了TensorFlow代码中的`ReadBinaryProto`方法用来读取加密过的`SavedModel`(Protobuffer文件)，该文件是用我们的[加密工具](https://github.com/Laiye-Tech/cryptpb)加密过的。
 
-## Architecture of encrypted model
+## 模型加密架构
 
 ![](./images/TensorFlow模型.jpg)
 
-Our encryption tool and `TensorFlow`'s decryption module (`loader.cc`) share the secret key which is hard-coded in the code. After the model training is completed, the encryption tool is used to encrypt the model into a ciphertext model. `TF-serving` requires the model that reads the ciphertext is decrypted before use it.
+我们的加密工具和 `TensorFlow` 解密模块(`loader.cc`)共享秘钥，秘钥是硬编码在代码中的，在模型训练完成后用加密工具将模型加密为密文模型，`TF-serving` 需要读取密文的模型解密后使用。
 
-### Build from sources
+### 从源码构建
 
-Same as the official build method. 
+跟官方的构建方式一样
 
 **CPU**
 ```sh
@@ -39,9 +39,9 @@ docker build --build-arg \
     -f tensorflow_serving/tools/docker/Dockerfile.gpu .
 ```
 
-### Run
+### 运行
 
-Make sure saved_model.pb is encrypted by our [crypt tool](https://github.com/Laiye-Tech/cryptpb#run)
+确保 `saved_model.pb` 是用我们的 [加密工具](https://github.com/Laiye-Tech/cryptpb#run) 加密过的。
 
 ```sh
 # Location of demo models
@@ -60,3 +60,4 @@ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
 
 # Returns => { "predictions": [2.5, 3.0, 4.5] }
 ```
+
