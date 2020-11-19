@@ -4,13 +4,13 @@
 
 ## Difference from origin repo
 
-This forked repo provide a way to protect the safety of model files, it uses forked TensorFlow repo [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow) which modified `ReadBinaryProto` function for loading a encrypted saved model(a pb file). So the saved model should be ecnrypted by our [ecnrypt tool](https://github.com/Laiye-Tech/cryptpb).
+This forked repo provide a way to protect the safety of model files, it uses forked TensorFlow repo [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow) which modified `ReadBinaryProto` function for loading an encrypted saved model(a pb file). So the saved model should be ecnrypted by our [ecnrypt tool](https://github.com/Laiye-Tech/cryptpb).
 
 ## Architecture of encrypted model
 
 ![](./images/TensorFlow模型.jpg)
 
-Our encryption tool and `TensorFlow`'s decryption module (`loader.cc`) share the secret key which is hard-coded in the code. After the model training is completed, the encryption tool is used to encrypt the model into a ciphertext model. `TF-serving` requires the model that reads the ciphertext is decrypted before use it.
+Our encryption tool and `TensorFlow`'s decryption module (`loader.cc`) share the secret key which is hard-coded in the code. After the model training is completed, the encryption tool is used to encrypt the model into a ciphertext model. `TF-serving` requires the model that reads the ciphertext be decrypted before using it.
 
 ### Build from sources
 
