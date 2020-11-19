@@ -4,7 +4,7 @@
 
 ## Difference from origin repo
 
-This forked repo provide a way to protect the safety of model files, it use forked TensorFlow repo [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow) which modified `ReadBinaryProto` function for load a encrypted saved model(a pb file). so the saved model should be ecnrypted by our [ecnrypt tool](https://github.com/Laiye-Tech/cryptpb).
+This forked repo provide a way to protect the safety of model files, it uses forked TensorFlow repo [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow) which modified `ReadBinaryProto` function for loading a encrypted saved model(a pb file). So the saved model should be ecnrypted by our [ecnrypt tool](https://github.com/Laiye-Tech/cryptpb).
 
 ## Architecture of encrypted model
 
