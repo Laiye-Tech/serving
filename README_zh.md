@@ -2,9 +2,9 @@
 
 [README](README.md) | [中文文档](README_zh.md)
 
-## 与官方repo的区别
+## 简介
 
-此 repo 提供一种保护模型文件安全性的方法，它依赖我们 fork 的 TensorFlow repo: [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow)，我们修改了TensorFlow代码中的`ReadBinaryProto`方法用来读取加密过的`SavedModel`(Protobuffer文件)，该文件是用我们的[加密工具](https://github.com/Laiye-Tech/cryptpb)加密过的。
+众所周知，机器学习的模型是每个 AI 企业最重要的”知识产权“，而 `TensorFlow Serving` 以 `Protobuffer` 文件编码模型，在运行时直接加载模型，这很有可能导致模型泄露，从而造成企业难以估量的损失。此 repo 提供一种保护模型文件安全性的方法，它依赖我们 fork 的 TensorFlow repo: [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow)，我们修改了 TensorFlow 代码中的`ReadBinaryProto`方法用来读取加密过的`SavedModel`(Protobuffer 文件)，该文件需要用我们开源的[加密工具](https://github.com/Laiye-Tech/cryptpb)加密。
 
 ## 模型加密架构
 
@@ -12,11 +12,19 @@
 
 我们的加密工具和 `TensorFlow` 解密模块(`loader.cc`)共享秘钥，秘钥是硬编码在代码中的，在模型训练完成后用加密工具将模型加密为密文模型，`TF-serving` 需要读取密文的模型解密后使用。
 
-### 从源码构建
+> 为了提高安全性，构建后的tfserving可执行文件还可以用 [upx](https://upx.github.io/) 工具做一次混淆。
 
+## 从源码构建
+
+### 准备工作
+
+出于安全性考虑，不要用默认的秘钥。你可以在这[cryptfile.cc#L119](https://github.com/Laiye-Tech/cryptpb/blob/main/cryptfile/cryptfile.cc#L119)和[env.cc#L62](https://github.com/Laiye-Tech/tensorflow/blob/master/tensorflow/core/platform/env.cc#L62)两个位置修改共享秘钥。我们目前采用 `AES` 加密算法，你可以修改它的 key 和 iv。
+
+### 构建
 跟官方的构建方式一样
 
 **CPU**
+
 ```sh
 docker build --build-arg \
     -t tensorflow-serving-devel \
@@ -29,6 +37,7 @@ docker build --build-arg \
 ```
 
 **GPU**
+
 ```sh
 docker build -t tensorflow-serving-devel-gpu \
     -f tensorflow_serving/tools/docker/Dockerfile.devel-gpu .
@@ -60,4 +69,3 @@ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
 
 # Returns => { "predictions": [2.5, 3.0, 4.5] }
 ```
-
