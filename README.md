@@ -2,9 +2,9 @@
 
 [README](README.md) | [中文文档](README_zh.md)
 
-## Difference from origin repo
+## Overview
 
-This forked repo provide a way to protect the safety of model files, it uses forked TensorFlow repo [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow) which modified `ReadBinaryProto` function for loading an encrypted saved model(a pb file). So the saved model should be ecnrypted by our [ecnrypt tool](https://github.com/Laiye-Tech/cryptpb).
+As we all know, the machine learning model is the most important "intellectual property" of every AI company, and `TensorFlow Serving` encodes the model in the `Protobuffer` file and loads the model directly at runtime. This is likely to cause the model to leak and cause the company Incalculable loss. This forked repo provide a way to protect the safety of model files, it uses forked TensorFlow repo [https://github.com/Laiye-Tech/tensorflow](https://github.com/Laiye-Tech/tensorflow) which modified `ReadBinaryProto` function for loading an encrypted saved model(a pb file). So the saved model should be ecnrypted by our [ecnrypt tool](https://github.com/Laiye-Tech/cryptpb).
 
 ## Architecture of encrypted model
 
@@ -12,7 +12,11 @@ This forked repo provide a way to protect the safety of model files, it uses for
 
 Our encryption tool and `TensorFlow`'s decryption module (`loader.cc`) share the secret key which is hard-coded in the code. After the model training is completed, the encryption tool is used to encrypt the model into a ciphertext model. `TF-serving` requires the model that reads the ciphertext be decrypted before using it.
 
-### Build from sources
+## Build from sources
+
+### Prepare
+
+For security reasons, do not use the default secret key. You can modify the shared secret key in these two locations: [cryptfile.cc#L119](https://github.com/Laiye-Tech/cryptpb/blob/main/cryptfile/cryptfile.cc#L119) and [env.cc#L62](https://github.com/Laiye-Tech/tensorflow/blob/master/tensorflow/core/platform/env.cc#L62). We currently use the `AES` encryption algorithm, you can modify its key and iv.
 
 Same as the official build method. 
 
