@@ -12,7 +12,7 @@
 
 我们的加密工具和 `TensorFlow` 解密模块(`loader.cc`)共享秘钥，秘钥是硬编码在代码中的，在模型训练完成后用加密工具将模型加密为密文模型，`TF-serving` 需要读取密文的模型解密后使用。
 
-> 为了提高安全性，构建后的tfserving可执行文件还可以用 [upx](https://upx.github.io/) 工具做一次混淆。
+> 为了提高安全性，构建后的 tfserving 可执行文件还可以用 [upx](https://upx.github.io/) 工具做一次混淆。
 
 ## 从源码构建
 
@@ -20,7 +20,10 @@
 
 出于安全性考虑，不要用默认的秘钥。你可以在这[cryptfile.cc#L119](https://github.com/Laiye-Tech/cryptpb/blob/main/cryptfile/cryptfile.cc#L119)和[env.cc#L62](https://github.com/Laiye-Tech/tensorflow/blob/master/tensorflow/core/platform/env.cc#L62)两个位置修改共享秘钥。我们目前采用 `AES` 加密算法，你可以修改它的 key 和 iv。
 
+> 注意：这两处的 key 和 iv 需要保持一致
+
 ### 构建
+
 跟官方的构建方式一样
 
 **CPU**
