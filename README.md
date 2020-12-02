@@ -18,9 +18,14 @@ Our encryption tool and `TensorFlow`'s decryption module (`loader.cc`) share the
 
 For security reasons, do not use the default secret key. You can modify the shared secret key in these two locations: [cryptfile.cc#L119](https://github.com/Laiye-Tech/cryptpb/blob/main/cryptfile/cryptfile.cc#L119) and [env.cc#L62](https://github.com/Laiye-Tech/tensorflow/blob/master/tensorflow/core/platform/env.cc#L62). We currently use the `AES` encryption algorithm, you can modify its key and iv.
 
-Same as the official build method. 
+> Note: The key and iv in these two places need to be consistent
+
+### Build
+
+Same as the official build method.
 
 **CPU**
+
 ```sh
 docker build --build-arg \
     -t tensorflow-serving-devel \
@@ -33,6 +38,7 @@ docker build --build-arg \
 ```
 
 **GPU**
+
 ```sh
 docker build -t tensorflow-serving-devel-gpu \
     -f tensorflow_serving/tools/docker/Dockerfile.devel-gpu .
