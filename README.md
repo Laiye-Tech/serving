@@ -22,7 +22,7 @@ For security reasons, do not use the default secret key. You can modify the shar
 
 ### Build
 
-Same as the official build method. However, official build cloning online code when building specified a commit hash, we modify secret key local, so we are using local building as described below.
+Same as the official build method. However, official build cloning online code when building specified a commit hash, but we modify secret key in local, so we are using local building as described below.
 
 ---
 
@@ -30,12 +30,13 @@ Same as the official build method. However, official build cloning online code w
 
 You can also modify [WORKSPACE#L18](https://github.com/Laiye-Tech/serving/blob/master/WORKSPACE#L18) to use local_repository rule of bazel.
 
-1. Copy tensorflow into serving dir to enclosed by docker build context
+1. Copy tensorflow source code which has modified secret key into serving dir to enclosed by docker build context
+
 ```bash
 cp -r ../tensorflow ./tensorflow
 ```
 
-2. modity Dockerfiles and bazel files to using local repo
+2. modity Dockerfiles and bazel files below to using local repo
 
 - tensorflow_serving/tools/docker/Dockerfile.devel
 - tensorflow_serving/tools/docker/Dockerfile.devel-gpu

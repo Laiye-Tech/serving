@@ -24,7 +24,30 @@
 
 ### 构建
 
-跟官方的构建方式一样
+跟官方的构建方式一样，但是官方构建的`Dockerfile` 会在构建时下载指定版本的代码，由于我们会在本地修改秘钥，所以需要用如下方式进行本地编译。
+
+---
+
+**本地编译**
+
+你可以修改 [WORKSPACE#L18](https://github.com/Laiye-Tech/serving/blob/master/WORKSPACE#L18) 使用 bazel 的 `local_repository` 规则
+
+1. 把修改过的秘钥的 tensorflow 代码目录拷贝进当前serving目录下，这样它会被 docker build context 包含。
+
+```bash
+cp -r ../tensorflow ./tensorflow
+```
+
+2. 修改下列 Dockerfile 和 bazel 配置文件以使用本地编译
+
+- tensorflow_serving/tools/docker/Dockerfile.devel
+- tensorflow_serving/tools/docker/Dockerfile.devel-gpu
+- WORKSPACE
+- tensorflow_serving/workspace.bzl (possible, fix some checksum errors when building)
+
+例如，可以应用这个 [patch](./local_build.patch) 来进行本地编译。
+
+---
 
 **CPU**
 
@@ -71,4 +94,36 @@ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
     -X POST http://localhost:8501/v1/models/half_plus_two:predict
 
 # Returns => { "predictions": [2.5, 3.0, 4.5] }
+```
+
+## 升级
+
+创建一个新的 branch，然后 rebase 到官方的要升级的 tag。用这个 branch 来构建升级过的 tensorflow serving。以升级到 2.4.0 为例
+
+```bash
+# 1. 升级 tensorflow
+git clone https://github.com/Laiye-Tech/tensorflow
+cd tensorflow
+git branch b2.4.0
+git remote add tf https://github.com/tensorflow/tensorflow
+git fetch tf refs/tags/v2.4.0:refs/tags/v2.4.0
+git checkout -b tf2.4.0 tags/v2.4.0
+git checkout b2.4.0
+git rebase tf2.4.0
+# 解决可能的冲突
+git push --set-upstream origin b2.4.0
+
+# 2. 升级 tensorflow serving
+git clone https://github.com/Laiye-Tech/serving
+cd tensorflow
+git branch b2.4.0
+git remote add tf https://github.com/tensorflow/serving
+git fetch tf
+git checkout -b tf2.4.0 tags/2.4.0
+git checkout b2.4.0
+git rebase tf2.4.0
+# 解决可能的冲突
+git push --set-upstream origin b2.4.0
+
+# 然后修改 ###Prepare 段落描述的秘钥，参照 ### Build 段落进行构建。
 ```
