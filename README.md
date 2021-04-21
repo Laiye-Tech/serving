@@ -22,12 +22,34 @@ For security reasons, do not use the default secret key. You can modify the shar
 
 ### Build
 
-Same as the official build method.
+Same as the official build method. However, official build cloning online code when building specified a commit hash, we modify secret key local, so we are using local building as described below.
+
+---
+
+**Local building**
+
+You can also modify [WORKSPACE#L18](https://github.com/Laiye-Tech/serving/blob/master/WORKSPACE#L18) to use local_repository rule of bazel.
+
+1. Copy tensorflow into serving dir to enclosed by docker build context
+```bash
+cp -r ../tensorflow ./tensorflow
+```
+
+2. modity Dockerfiles and bazel files to using local repo
+
+- tensorflow_serving/tools/docker/Dockerfile.devel
+- tensorflow_serving/tools/docker/Dockerfile.devel-gpu
+- WORKSPACE
+- tensorflow_serving/workspace.bzl (possible, fix some checksum errors when building)
+
+There is a example [patch](./local_build.patch) to apply local build
+
+---
 
 **CPU**
 
 ```sh
-docker build --build-arg \
+docker build  \
     -t tensorflow-serving-devel \
     -f tensorflow_serving/tools/docker/Dockerfile.devel .
 
@@ -40,7 +62,8 @@ docker build --build-arg \
 **GPU**
 
 ```sh
-docker build -t tensorflow-serving-devel-gpu \
+docker build \
+    -t tensorflow-serving-devel-gpu \
     -f tensorflow_serving/tools/docker/Dockerfile.devel-gpu .
 
 docker build --build-arg \
@@ -69,4 +92,36 @@ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
     -X POST http://localhost:8501/v1/models/half_plus_two:predict
 
 # Returns => { "predictions": [2.5, 3.0, 4.5] }
+```
+
+### Upgrade
+
+We create a new branch then rebase to offical tag. Use this branch to build upgraded tensorflow serving. For example, upgrade to 2.4.0:
+
+```bash
+# 1. upgrade tensorflow
+git clone https://github.com/Laiye-Tech/tensorflow
+cd tensorflow
+git branch b2.4.0
+git remote add tf https://github.com/tensorflow/tensorflow
+git fetch tf refs/tags/v2.4.0:refs/tags/v2.4.0
+git checkout -b tf2.4.0 tags/v2.4.0
+git checkout b2.4.0
+git rebase tf2.4.0
+# resolve possibility conflicts
+git push --set-upstream origin b2.4.0
+
+# 2. upgrade tensorflow serving
+git clone https://github.com/Laiye-Tech/serving
+cd tensorflow
+git branch b2.4.0
+git remote add tf https://github.com/tensorflow/serving
+git fetch tf
+git checkout -b tf2.4.0 tags/2.4.0
+git checkout b2.4.0
+git rebase tf2.4.0
+# resolve possibility conflicts
+git push --set-upstream origin b2.4.0
+
+# then modify the shared secret key as described in section ### Prepare and build it in section ### Build.
 ```

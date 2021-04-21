@@ -1,0 +1,69 @@
+diff --git a/WORKSPACE b/WORKSPACE
+index 6b97862..a8965b6 100644
+--- a/WORKSPACE
++++ b/WORKSPACE
+@@ -15,10 +15,9 @@ workspace(name = "tf_serving")
+ #     git_commit = "638f20b2a37bec2d77159a03f6bc87b86e5ff8c0",
+ # )
+ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+-git_repository(
++local_repository(
+     name = "org_tensorflow",
+-    branch = "b2.4.0",
+-    remote = "http://github.com/Laiye-Tech/tensorflow.git",
++    path = "/tensorflow-serving/tensorflow"
+ )
+ 
+ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+diff --git a/tensorflow_serving/tools/docker/Dockerfile.devel b/tensorflow_serving/tools/docker/Dockerfile.devel
+index 94992c6..8c15193 100644
+--- a/tensorflow_serving/tools/docker/Dockerfile.devel
++++ b/tensorflow_serving/tools/docker/Dockerfile.devel
+@@ -89,10 +89,11 @@ RUN mkdir /bazel && \
+ 
+ # Download TF Serving sources (optionally at specific commit).
+ WORKDIR /tensorflow-serving
+-RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} \
+-    http://github.com/Laiye-Tech/serving.git . && \
+-    git remote add upstream https://github.com/Laiye-Tech/serving.git && \
+-    if [ "${TF_SERVING_VERSION_GIT_COMMIT}" != "head" ]; then git checkout ${TF_SERVING_VERSION_GIT_COMMIT} ; fi
++# RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} \
++#     http://github.com/Laiye-Tech/serving.git . && \
++#     git remote add upstream https://github.com/Laiye-Tech/serving.git && \
++#     if [ "${TF_SERVING_VERSION_GIT_COMMIT}" != "head" ]; then git checkout ${TF_SERVING_VERSION_GIT_COMMIT} ; fi
++ADD . /tensorflow-serving
+ 
+ FROM base_build as binary_build
+ # Build, and install TensorFlow Serving
+diff --git a/tensorflow_serving/tools/docker/Dockerfile.devel-gpu b/tensorflow_serving/tools/docker/Dockerfile.devel-gpu
+index 2e49145..ce8ffef 100644
+--- a/tensorflow_serving/tools/docker/Dockerfile.devel-gpu
++++ b/tensorflow_serving/tools/docker/Dockerfile.devel-gpu
+@@ -143,9 +143,11 @@ ENV TMP="/tmp"
+ 
+ # Download TF Serving sources (optionally at specific commit).
+ WORKDIR /tensorflow-serving
+-RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} https://github.com/Laiye-Tech/serving . && \
+-    git remote add upstream https://github.com/Laiye-Tech/serving.git && \
+-    if [ "${TF_SERVING_VERSION_GIT_COMMIT}" != "head" ]; then git checkout ${TF_SERVING_VERSION_GIT_COMMIT} ; fi
++# RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} \
++#     http://github.com/Laiye-Tech/serving.git . && \
++#     git remote add upstream https://github.com/Laiye-Tech/serving.git && \
++#     if [ "${TF_SERVING_VERSION_GIT_COMMIT}" != "head" ]; then git checkout ${TF_SERVING_VERSION_GIT_COMMIT} ; fi
++ADD . /tensorflow-serving
+ 
+ FROM base_build as binary_build
+ # Build, and install TensorFlow Serving
+diff --git a/tensorflow_serving/workspace.bzl b/tensorflow_serving/workspace.bzl
+index 05bddf5..4789d27 100644
+--- a/tensorflow_serving/workspace.bzl
++++ b/tensorflow_serving/workspace.bzl
+@@ -49,7 +49,7 @@ def tf_serving_workspace():
+     http_archive(
+         name = "icu",
+         strip_prefix = "icu-release-64-2",
+-        sha256 = "dfc62618aa4bd3ca14a3df548cd65fe393155edd213e49c39f3a30ccd618fc27",
++        sha256 = "10cd92f1585c537d937ecbb587f6c3b36a5275c87feabe05d777a828677ec32f",
+         urls = [
+             "https://storage.googleapis.com/mirror.tensorflow.org/github.com/unicode-org/icu/archive/release-64-2.zip",
+             "https://github.com/unicode-org/icu/archive/release-64-2.zip",
