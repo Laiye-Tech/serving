@@ -23,7 +23,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
     name = "org_tensorflow",
     branch = "b2.7.2",
-    remote = "http://github.com/Laiye-Tech/tensorflow.git",
+    remote = "https://github.com/Laiye-Tech/tensorflow.git",
 )
 
 # Import all of TensorFlow Serving's external dependencies.
