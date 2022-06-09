@@ -91,7 +91,7 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
 # Make python3.7 the default python version
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 0
 
-RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
+RUN curl -fSsL -O https://bootstrap.pypa.io/pip/3.6/get-pip.py && \
     python3 get-pip.py && \
     rm get-pip.py
 
