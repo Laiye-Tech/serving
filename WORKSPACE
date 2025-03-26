@@ -30,12 +30,11 @@ local_repository(
 # )
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
-load("//tensorflow_serving:repo.bzl", "tensorflow_http_archive")
-tensorflow_http_archive(
     name = "org_tensorflow",
-    sha256 = "403916fbcfcbd5657cd891a871debc72433d7a8c56760297a79085e1abc8f18a",
-    git_commit = "6550e4bd80223cdb8be6c3afd1f81e86a4d433c3",
+    remote = "https://github.com/Laiye-Tech/tensorflow.git",
+    branch = "${TF_SERVING_VERSION}",
 )
+
 
 # Import all of TensorFlow Serving's external dependencies.
 # Downstream projects (projects importing TensorFlow Serving) need to
@@ -44,9 +43,6 @@ tensorflow_http_archive(
 load("//tensorflow_serving:workspace.bzl", "tf_serving_workspace")
 tf_serving_workspace()
 
-# Check bazel version requirement, which is stricter than TensorFlow's.
-load("@bazel_skylib//lib:versions.bzl", "versions")
-versions.check("6.5.0")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -58,6 +54,10 @@ http_archive(
         "https://github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
     ],
 )
+
+# Check bazel version requirement, which is stricter than TensorFlow's.
+load("@bazel_skylib//lib:versions.bzl", "versions")
+versions.check("6.5.0")
 
 http_archive(
     name = "rules_python",

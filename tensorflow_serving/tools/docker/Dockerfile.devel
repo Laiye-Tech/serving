@@ -93,10 +93,7 @@ RUN mkdir /bazel && \
 
 # Download TF Serving sources (optionally at specific commit).
 WORKDIR /tensorflow-serving
-RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} \
-    http://github.com/Laiye-Tech/serving.git . && \
-    git remote add upstream https://github.com/Laiye-Tech/serving.git && \
-    if [ "${TF_SERVING_VERSION_GIT_COMMIT}" != "head" ]; then git checkout ${TF_SERVING_VERSION_GIT_COMMIT} ; fi
+COPY . .
 
 FROM base_build as binary_build
 # Build, and install TensorFlow Serving
@@ -105,7 +102,10 @@ RUN echo "Building with build options: $TF_SERVING_BUILD_OPTIONS"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: $TF_SERVING_BAZEL_OPTIONS"
 
-RUN bazel build --color=yes --curses=yes \
+
+# 构建模型服务器
+RUN --mount=type=cache,target=/root/.cache/bazel \
+    bazel build --color=yes --curses=yes \
     ${TF_SERVING_BAZEL_OPTIONS} \
     --verbose_failures \
     --output_filter=DONT_MATCH_ANYTHING \
@@ -115,8 +115,9 @@ RUN bazel build --color=yes --curses=yes \
     cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server \
     /usr/local/bin/
 
-# Build and install TensorFlow Serving API
-RUN bazel build --color=yes --curses=yes \
+# 构建和安装 TensorFlow Serving API
+RUN --mount=type=cache,target=/root/.cache/bazel \
+    bazel build --color=yes --curses=yes \
     ${TF_SERVING_BAZEL_OPTIONS} \
     --verbose_failures \
     --output_filter=DONT_MATCH_ANYTHING \

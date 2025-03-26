@@ -14,6 +14,7 @@
 
 ARG TF_SERVING_VERSION=latest
 ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
+ARG ENCRYPT_FILE_URL=https://www.laiye.com/libcryptfile.so
 
 FROM ${TF_SERVING_BUILD_IMAGE} as build_image
 FROM nvidia/cuda:12.2.0-base-ubuntu20.04 as base_build
@@ -34,7 +35,9 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 RUN apt-get update && apt-get install -y --no-install-recommends \
         curl
 
-RUN curl -sSL --retry 5 https://raw.githubusercontent.com/tensorflow/serving/${TF_SERVING_VERSION_GIT_COMMIT}/tensorflow_serving/tools/docker/setup.sources.sh | sh
+#RUN curl -sSL --retry 5 https://raw.githubusercontent.com/tensorflow/serving/${TF_SERVING_VERSION_GIT_COMMIT}/tensorflow_serving/tools/docker/setup.sources.sh | sh
+COPY tensorflow_serving/tools/docker/setup.sources.sh /root/setup.sources.sh
+RUN bash /root/setup.sources.sh
 
 RUN apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -86,5 +89,6 @@ tensorflow_model_server --port=8500 --rest_api_port=8501 \
 "$@"' > /usr/bin/tf_serving_entrypoint.sh \
 && chmod +x /usr/bin/tf_serving_entrypoint.sh
 
+ADD ${ENCRYPT_FILE_URL} /opt/lib/libcryptfile.so
 ENTRYPOINT ["/usr/bin/tf_serving_entrypoint.sh"]
 

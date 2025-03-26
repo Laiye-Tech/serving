@@ -28,11 +28,8 @@ ENV CUDA=12.2
 RUN apt-get update && apt-get install -y --no-install-recommends \
         curl
 
-# Download TF Serving sources (optionally at specific commit).
-WORKDIR /tensorflow-serving
-RUN curl -sSL --retry 5 https://github.com/tensorflow/serving/tarball/${TF_SERVING_VERSION_GIT_COMMIT} | tar --strip-components=1 -xzf -
-
-RUN /tensorflow-serving/tensorflow_serving/tools/docker/setup.sources.sh
+COPY tensorflow_serving/tools/docker/setup.sources.sh /root/setup.sources.sh
+RUN /root/setup.sources.sh
 
 RUN apt-get install -y --no-install-recommends \
         cuda-command-line-tools-12-2 \
@@ -149,9 +146,8 @@ ENV TF_NCCL_VERSION=
 ENV TMP="/tmp"
 
 WORKDIR /tensorflow-serving
-RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} https://github.com/Laiye-Tech/serving . && \
-    git remote add upstream https://github.com/Laiye-Tech/serving.git && \
-    if [ "${TF_SERVING_VERSION_GIT_COMMIT}" != "head" ]; then git checkout ${TF_SERVING_VERSION_GIT_COMMIT} ; fi
+COPY . /tensorflow-serving/
+
 
 FROM base_build as binary_build
 # Build, and install TensorFlow Serving
@@ -160,7 +156,9 @@ RUN echo "Building with build options: $TF_SERVING_BUILD_OPTIONS"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: $TF_SERVING_BAZEL_OPTIONS"
 
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+# 然后进行构建
+RUN --mount=type=cache,target=/root/.cache/bazel \
+    ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
     bazel build --color=yes --curses=yes --config=cuda_clang --copt="-fPIC"\
     ${TF_SERVING_BAZEL_OPTIONS} \
@@ -171,9 +169,9 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server \
     /usr/local/bin/ && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1
-
 # Build and install TensorFlow Serving API
-RUN bazel build --color=yes --curses=yes \
+RUN --mount=type=cache,target=/root/.cache/bazel \
+    bazel build --color=yes --curses=yes \
     ${TF_SERVING_BAZEL_OPTIONS} \
     --verbose_failures \
     --output_filter=DONT_MATCH_ANYTHING \

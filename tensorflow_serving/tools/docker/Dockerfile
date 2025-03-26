@@ -14,6 +14,7 @@
 
 ARG TF_SERVING_VERSION=latest
 ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel
+ARG ENCRYPT_FILE_URL=https://www.laiye.com/libcryptfile.so
 
 FROM ${TF_SERVING_BUILD_IMAGE} as build_image
 FROM ubuntu:20.04
@@ -57,4 +58,5 @@ tensorflow_model_server --port=8500 --rest_api_port=8501 \
 "$@"' > /usr/bin/tf_serving_entrypoint.sh \
 && chmod +x /usr/bin/tf_serving_entrypoint.sh
 
+ADD ${ENCRYPT_FILE_URL} /opt/lib/libcryptfile.so
 ENTRYPOINT ["/usr/bin/tf_serving_entrypoint.sh"]

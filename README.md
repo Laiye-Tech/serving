@@ -97,32 +97,37 @@ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
 
 ### Upgrade
 
-We create a new branch then rebase to offical tag. Use this branch to build upgraded tensorflow serving. For example, upgrade to 2.4.0:
+We create a new branch then rebase to offical tag. Use this branch to build upgraded tensorflow serving. For example, upgrade to 2.18.0:
 
 ```bash
 # 1. upgrade tensorflow
 git clone https://github.com/Laiye-Tech/tensorflow
 cd tensorflow
-git branch b2.4.0
+git branch b2.18.0
 git remote add tf https://github.com/tensorflow/tensorflow
-git fetch tf refs/tags/v2.4.0:refs/tags/v2.4.0
-git checkout -b tf2.4.0 tags/v2.4.0
-git checkout b2.4.0
-git rebase tf2.4.0
+git fetch tf refs/tags/v2.18.0:refs/tags/v2.4.0
+git checkout -b tf2.18.0 tags/v2.4.0
+git checkout b2.18.0
+# suggest not rebase fix it
+git rebase tf2.18.0
 # resolve possibility conflicts
-git push --set-upstream origin b2.4.0
+git push --set-upstream origin b2.18.0
 
 # 2. upgrade tensorflow serving
 git clone https://github.com/Laiye-Tech/serving
 cd tensorflow
-git branch b2.4.0
+git branch b2.18.0
 git remote add tf https://github.com/tensorflow/serving
 git fetch tf
-git checkout -b tf2.4.0 tags/2.4.0
-git checkout b2.4.0
-git rebase tf2.4.0
+git checkout -b tf2.18.0 tags/2.4.0
+git checkout b2.18.0
+git rebase tf2.18.0
 # resolve possibility conflicts
-git push --set-upstream origin b2.4.0
+git push --set-upstream origin b2.18.0
+
+
+export ENCRYPT_FILE_URL=your compile file(/opt/lib/libcryptfile.so)
+bash local_build.sh
 
 # then modify the shared secret key as described in section ### Prepare and build it in section ### Build.
 ```
