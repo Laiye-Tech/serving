@@ -98,32 +98,37 @@ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
 
 ## 升级
 
-创建一个新的 branch，然后 rebase 到官方的要升级的 tag。用这个 branch 来构建升级过的 tensorflow serving。以升级到 2.4.0 为例
+创建一个新的 branch，然后 rebase 到官方的要升级的 tag。用这个 branch 来构建升级过的 tensorflow serving。以升级到 2.18.0 为例
 
 ```bash
 # 1. 升级 tensorflow
 git clone https://github.com/Laiye-Tech/tensorflow
 cd tensorflow
-git branch b2.4.0
+git branch b2.18.0
 git remote add tf https://github.com/tensorflow/tensorflow
-git fetch tf refs/tags/v2.4.0:refs/tags/v2.4.0
-git checkout -b tf2.4.0 tags/v2.4.0
-git checkout b2.4.0
-git rebase tf2.4.0
+git fetch tf refs/tags/v2.18.0:refs/tags/v2.4.0
+git checkout -b tf2.18.0 tags/v2.4.0
+git checkout b2.18.0
+# 其实建议直接修改别合并了
+git rebase tf2.18.0
 # 解决可能的冲突
-git push --set-upstream origin b2.4.0
+git push --set-upstream origin b2.18.0
 
 # 2. 升级 tensorflow serving
 git clone https://github.com/Laiye-Tech/serving
 cd tensorflow
-git branch b2.4.0
+git branch b2.18.0
 git remote add tf https://github.com/tensorflow/serving
 git fetch tf
-git checkout -b tf2.4.0 tags/2.4.0
-git checkout b2.4.0
-git rebase tf2.4.0
+git checkout -b tf2.18.0 tags/2.4.0
+git checkout b2.18.0
+git rebase tf2.18.0
 # 解决可能的冲突
-git push --set-upstream origin b2.4.0
+git push --set-upstream origin b2.18.0
 
 # 然后修改 ###Prepare 段落描述的秘钥，参照 ### Build 段落进行构建。
+修改build
+export ENCRYPT_FILE_URL=your compile file(/opt/lib/libcryptfile.so)
+bash local_build.sh
+
 ```
